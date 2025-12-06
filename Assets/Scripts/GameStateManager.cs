@@ -73,9 +73,30 @@ public class GameStateManager : MonoBehaviour
         }
     }
 
+    public void BtnEnterInitials()
+    {
+        SetState(GameState.EnterInitials);
+    }
+
     // Button hooks for UI
 
-    public void BtnStartGame() => SetState(GameState.Game);
+    public void BtnStartGame()
+    {
+        // Tries to apply JSON start config (player + pickups)
+        var loader = FindObjectOfType<StartConfigLoader>();
+        if (loader != null)
+        {
+            loader.ApplyFromFile();
+        }
+        else
+        {
+            Debug.LogWarning("[GameStateManager] No StartConfigLoader found in scene.");
+        }
+
+        // Starts the game
+        SetState(GameState.Game);
+    }
+
     public void BtnShowHighScores() => SetState(GameState.HighScores);
     public void BtnShowCredits() => SetState(GameState.Credits);
     public void BtnShowInstructions() => SetState(GameState.Instructions);
