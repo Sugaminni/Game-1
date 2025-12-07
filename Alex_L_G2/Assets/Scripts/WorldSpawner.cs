@@ -51,7 +51,5 @@ public class WorldSpawner : MonoBehaviour
                 livePickups.Add(p);
             }
         }
-
-        Debug.Log($"[WorldSpawner] Spawned {liveEnemies.Count} enemies, {livePickups.Count} pickups.");
     }
 }

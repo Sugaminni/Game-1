@@ -26,7 +26,6 @@ public class WeaponInventory : MonoBehaviour
         owned.Clear();
         var root = weaponMount ? weaponMount : transform;
         owned.AddRange(root.GetComponentsInChildren<WeaponBase>(true)); // include inactive
-        Debug.Log($"[WeaponInventory] {from}: found {owned.Count} weapon(s) under '{root.name}'.");
     }
 
     // Registers a weapon into the inventory

@@ -2,37 +2,48 @@ using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 
+[System.Serializable]
+public class HighScoreEntry
+{
+    public string name;
+    public int score;
+}
+
+[System.Serializable]
+public class HighScoreTable
+{
+    public HighScoreEntry[] entries = new HighScoreEntry[0];
+}
+
 public static class HighScoreIO
 {
-    // File path
     static readonly string PathFile =
-        Path.Combine(Application.persistentDataPath, "highscores.json");
+        System.IO.Path.Combine(Application.persistentDataPath, "highscores.json");
 
-    // Loads existing table or creates a new empty one if missing/corrupt
+    // Loads the high score table from file or creates a new one if none exists
     public static HighScoreTable LoadOrCreate()
     {
         try
         {
             if (!File.Exists(PathFile))
             {
-                // No file yet = create empty table and save it
+                Debug.Log($"[HighScoreIO] No file, creating new at {PathFile}");
                 var empty = new HighScoreTable { entries = new HighScoreEntry[0] };
                 Save(empty);
                 return empty;
             }
 
             string json = File.ReadAllText(PathFile);
-            var tableLoaded = JsonUtility.FromJson<HighScoreTable>(json);
+            var table = JsonUtility.FromJson<HighScoreTable>(json);
 
-            if (tableLoaded == null || tableLoaded.entries == null)
+            if (table == null || table.entries == null)
             {
-                Debug.LogWarning("[HighScoreIO] File exists but data is invalid. Resetting.");
-                var empty = new HighScoreTable { entries = new HighScoreEntry[0] };
-                Save(empty);
-                return empty;
+                Debug.LogWarning("[HighScoreIO] Parsed null/invalid table, resetting.");
+                table = new HighScoreTable { entries = new HighScoreEntry[0] };
+                Save(table);
             }
 
-            return tableLoaded;
+            return table;
         }
         catch (System.Exception ex)
         {
@@ -43,13 +54,14 @@ public static class HighScoreIO
         }
     }
 
-    // Saves table back to JSON file
+    // Saves the high score table to file
     public static void Save(HighScoreTable table)
     {
         try
         {
             string json = JsonUtility.ToJson(table, true);
             File.WriteAllText(PathFile, json);
+            Debug.Log($"[HighScoreIO] Saved {table.entries.Length} entries to {PathFile}");
         }
         catch (System.Exception ex)
         {
@@ -57,17 +69,17 @@ public static class HighScoreIO
         }
     }
 
-    // Always inserts the score and keeps only the top 'max' entries
+    // Inserts a new high score entry, keeping the list sorted and capped at 'max' entries
     public static void Insert(HighScoreTable t, string name, int score, int max = 5)
     {
-        var list = new List<HighScoreEntry>(t.entries);
+        if (t.entries == null)
+            t.entries = new HighScoreEntry[0];
 
+        var list = new List<HighScoreEntry>(t.entries);
         list.Add(new HighScoreEntry { name = name, score = score });
 
-        // Sorts descending by score
         list.Sort((a, b) => b.score.CompareTo(a.score));
 
-        // Keeps only top 'max'
         if (list.Count > max)
             list.RemoveRange(max, list.Count - max);
 

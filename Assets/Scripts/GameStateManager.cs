@@ -75,6 +75,8 @@ public class GameStateManager : MonoBehaviour
 
     public void BtnEnterInitials()
     {
+
+        EnterInitialsPanel.SetPendingScore(123);
         SetState(GameState.EnterInitials);
     }
 
@@ -83,7 +85,7 @@ public class GameStateManager : MonoBehaviour
     public void BtnStartGame()
     {
         // Tries to apply JSON start config (player + pickups)
-        var loader = FindObjectOfType<StartConfigLoader>();
+        var loader = Object.FindFirstObjectByType<StartConfigLoader>();
         if (loader != null)
         {
             loader.ApplyFromFile();
